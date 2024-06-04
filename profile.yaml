@@ -1,0 +1,23 @@
+apiVersion: kubeflow.org/v1
+kind: Profile
+metadata:
+  name: sungjin
+spec:
+  owner:
+    kind: User
+    name: ssjj3552@gmail.com
+
+  ## plugins extend the functionality of the profile
+  ## https://github.com/kubeflow/kubeflow/tree/master/components/profile-controller#plugins
+  plugins: []
+
+  ## optionally create a ResourceQuota for the profile
+  ## https://github.com/kubeflow/kubeflow/tree/master/components/profile-controller#resourcequotaspec
+  ## https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/resource-quota-v1/#ResourceQuotaSpec
+  resourceQuotaSpec:
+    hard:
+      cpu: "4"
+      memory: "16Gi"
+      reqeusts.nvidia.com/gpu: "1"
+      persistentvolumeclaims: "10"
+      requests.storage: "100Gi"
