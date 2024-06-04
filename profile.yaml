@@ -5,7 +5,7 @@ metadata:
 spec:
   owner:
     kind: User
-    name: ssjj3552@gmail.com
+    name: sodyn99@gmail.com
 
   ## plugins extend the functionality of the profile
   ## https://github.com/kubeflow/kubeflow/tree/master/components/profile-controller#plugins

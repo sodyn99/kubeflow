@@ -24,9 +24,17 @@ minikube version
 ```
 
 ## Kubernetes 실행 (v1.26)
+<!--
+``` bash
+minikube start -p kubeflow --cpus 4 --memory 8096 --kubernetes-version=v1.26 --driver=docker
+``` -->
 
 ``` bash
-minikube start --cpus 4 --memory 8096 --kubernetes-version=v1.26
+minikube start -p kubeflow --driver docker --kubernetes-version=v1.26 --container-runtime docker --gpus all
+```
+
+```bash
+minikube profile list
 ```
 
 ```bash
@@ -63,7 +71,7 @@ while ! kustomize build example | kubectl apply -f -; do echo "Retrying to apply
 
 ```bash
 kubectl get pods -A
-kubectl get namepaces
+kubectl get namespaces
 ```
 
 기다리다 보면 모든 Pod가 정상 실행되는 것을 확인할 수 있다.
@@ -87,6 +95,7 @@ kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80
 
 ```bash
 nano profile.yaml
+# code profile.yaml
 ```
 
 아래 내용 복사, 수정
@@ -95,11 +104,11 @@ nano profile.yaml
 apiVersion: kubeflow.org/v1
 kind: Profile
 metadata:
-  name: sungjin    ## namespace 이름 수정
+  name: sungjin    ## Namespace 이름 수정
 spec:
   owner:
     kind: User
-    name: ssjj3552@gmail.com    ## email 수정
+    name: sodyn99@gmail.com    ## Email 수정
 
   ## plugins extend the functionality of the profile
   ## https://github.com/kubeflow/kubeflow/tree/master/components/profile-controller#plugins
@@ -121,6 +130,29 @@ spec:
 kubectl apply -f profile.yaml
 ```
 
+### 비밀번호 설정
+
+```bash
+nano manifests/common/dex/overlays/oauth2-proxy/config-map.yaml
+# code manifests/common/dex/overlays/oauth2-proxy/config-map.yaml
+```
+
+```yaml
+...
+  staticPasswords:
+  - email: user@example.com   # Email 수정
+    hash: $2y$12$4K/VkmDd1q1Orb3xAt82zu8gk7Ad6ReFR4LCP9UeYE90NLiN9Df72 # 해시된 비밀번호 수정
+    username: user    # User 이름 수정
+    userID: "15841185641784"    # User ID 수정
+    ...
+  staticClients:
+    redirectURIs: ["/authservice/oidc/callback"]    # 수정
+```
+
+
+[Bcrypt generator](https://bcrypt-generator.com/)를 이용해 비밀번호 해시
+
+
 ### Profile 확인
 
 ```bash
@@ -132,4 +164,20 @@ kubectl describe profile MY_PROFILE_NAME
 
 ```bash
 kubectl delete profile MY_PROFILE_NAME
+```
+
+### Profile 적용
+
+```bash
+kubectl delete deployments.apps dex -n auth
+```
+
+```bash
+kustomize build ./manifests/common/dex/overlays/oauth2-proxy | kubectl apply -f -
+```
+
+### 접속
+
+```bash
+kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80
 ```
