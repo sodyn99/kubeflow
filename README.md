@@ -30,7 +30,8 @@ minikube start -p kubeflow --cpus 4 --memory 8096 --kubernetes-version=v1.26 --d
 ``` -->
 
 ``` bash
-minikube start -p kubeflow --driver docker --kubernetes-version=v1.26 --container-runtime docker --gpus all
+minikube start -p kubeflow --cpus 4 --memory 8096 --driver docker --kubernetes-version=v1.26 --container-runtime docker --gpus all
+# minikube start -p kubeflow --cpus 4 --memory 8096 --kubernetes-version=v1.26 --driver=docker
 ```
 
 ```bash
@@ -91,7 +92,7 @@ kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80
 - Email: user@example.com
 - Password: 12341234
 
-## User 생성
+## User 생성 (* Pods `Running` 상태 확인 후)
 
 ```bash
 nano profile.yaml
@@ -130,6 +131,26 @@ spec:
 kubectl apply -f profile.yaml
 ```
 
+### Profile 확인
+
+```bash
+kubectl get profiles
+kubectl describe profile <PROFILE_NAME>
+```
+
+### Profile 삭제
+
+```bash
+kubectl delete profile <PROFILE_NAME>
+```
+
+### Profile 적용
+
+```bash
+kubectl delete deployments.apps dex -n auth
+```
+
+
 ### 비밀번호 설정
 
 ```bash
@@ -152,32 +173,64 @@ nano manifests/common/dex/overlays/oauth2-proxy/config-map.yaml
 
 [Bcrypt generator](https://bcrypt-generator.com/)를 이용해 비밀번호 해시
 
-
-### Profile 확인
-
-```bash
-kubectl get profiles
-kubectl describe profile MY_PROFILE_NAME
-```
-
-### Profile 삭제
-
-```bash
-kubectl delete profile MY_PROFILE_NAME
-```
-
-### Profile 적용
-
-```bash
-kubectl delete deployments.apps dex -n auth
-```
-
 ```bash
 kustomize build ./manifests/common/dex/overlays/oauth2-proxy | kubectl apply -f -
 ```
+
+확인
+
+```bash
+...
+configmap/dex configured
+...
+```
+
 
 ### 접속
 
 ```bash
 kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80
 ```
+
+## 기타
+
+
+### Pods, PVC
+
+- pod 확인
+
+  ```bash
+  kubectl get pods -n <PROFILE_NAME>
+  ```
+- pvc 확인, 삭제
+
+  ```bash
+  kubectl get pvc -n <PROFILE_NAME>
+  kubectl delete persistentvolumeclaim <PVC_NAME> -n <PROFILE_NAME>
+  ```
+
+### Minikube
+
+```bash
+minikube profile list
+minikube stop -p <Node_Name>
+minikube delete -p <Node_Name>
+```
+
+### Docker GPU
+
+```bash
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+```
+
+```bash
+docker run --rm --gpus all ubuntu:20.04 nvidia-smi
+```
+
+```python
+import tensorflow as tf
+tf.test.is_gpu_available()
+```
+

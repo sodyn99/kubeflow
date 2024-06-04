@@ -1,8 +1,8 @@
 
 ```bash
 minikube profile list
-minikube stop -p <Node Name>
-minikube delete -p <NOde Name>
+minikube stop -p <Node_Name>
+minikube delete -p <Node_Name>
 ```
 
 ```bash
