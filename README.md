@@ -242,3 +242,76 @@ import tensorflow as tf
 tf.test.is_gpu_available()
 ```
 
+# Minio
+
+## 서비스 확인
+
+```bash
+kubectl get svc -n kubeflow minio-service
+```
+
+## 포트 포워딩
+
+```bash
+kubectl port-forward --address="0.0.0.0" svc/minio-service -n kubeflow 9000:9000
+```
+
+### 접속
+
+[http://localhost:9000](http://localhost:9000)
+
+### 기본 사용자
+
+- Email: minio
+- Password: minio123
+
+
+## Notebook 내
+
+```bash
+wget https://dl.min.io/client/mc/release/linux-amd64/mc
+chmod +x mc
+mv mc /usr/local/bin/
+```
+
+```bash
+mc config host ls
+```
+
+```bash
+sudo apt-get install dnsutils
+nslookup <MIMIO_CLUSTER_IP>   # kubectl get svc -n kubeflow minio-service
+```
+
+```bash
+mc config host add kubeflow http://minio-service.kubeflow.svc.cluster.local:9000 minio minio123
+```
+
+### 확인
+
+```bash
+mc ls kubeflow
+```
+
+# Kserve
+
+```bash
+kubectl apply -f https://github.com/kserve/kserve/releases/download/v0.11.1/kserve_kubeflow.yaml
+```
+
+```bash
+kubectl apply -f iris.yaml -n sungjin
+kubectl get inferenceservices -n sungjin
+kubectl get pods -n sungjin
+kubectl delete inferenceservice sklearn-iris -n sungjin
+```
+
+```bash
+kubectl get resourcequotas -n sungjin
+kubectl describe resourcequota kf-resource-quota -n sungjin
+```
+
+```bash
+kubectl logs -n kubeflow -l control-plane=kserve-controller-manager
+kubectl get events -n sungjin --sort-by='.lastTimestamp'
+```
