@@ -57,8 +57,7 @@ kustomize version
 ## Kubeflow menifests 구성 및 배포 (v1.8)
 
 ```bash
-cd ~
-mkdir kubeflow
+git clone https://github.com/sodyn99/kubeflow.git
 cd kubeflow
 ```
 
@@ -144,11 +143,19 @@ kubectl describe profile <PROFILE_NAME>
 kubectl delete profile <PROFILE_NAME>
 ```
 
-### Profile 적용
+
+<!-- ```bash
+cp -r manifests/common/user-namespace manifests/common/<Name>-namespace
+```
 
 ```bash
-kubectl delete deployments.apps dex -n auth
+nano manifests/common/dex/<Name>-namespace/params.env   # 수정
+# code manifests/common/dex/<Name>-namespace/params.env
 ```
+
+```bash
+kustomize build common/<네임스페이스>-namespace/base | kubectl apply -f -
+``` -->
 
 
 ### 비밀번호 설정
@@ -174,6 +181,7 @@ nano manifests/common/dex/overlays/oauth2-proxy/config-map.yaml
 [Bcrypt generator](https://bcrypt-generator.com/)를 이용해 비밀번호 해시
 
 ```bash
+kubectl delete deployments.apps dex -n auth
 kustomize build ./manifests/common/dex/overlays/oauth2-proxy | kubectl apply -f -
 ```
 
